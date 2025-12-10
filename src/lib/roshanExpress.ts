@@ -1,55 +1,49 @@
 import http, { IncomingMessage, type ServerResponse } from "http";
 import { parseBody, parseURLParams, parseURLQueryStrings } from "../extensions/req.js";
-type Handler = (
+import { Handle } from "./handler.js";
+import { Router, type IRouter } from "./router.js";
+
+export type Handler = (
     req: IncomingMessage,
     res: ServerResponse,
     next?: () => void
 ) => Promise<void> | void;
 
-export class App {
+export class App extends Handle implements IRouter {
     private _middleware: Handler[] = [];
     private _prefixRoutes: string[] = [];
+    static routed: number = 0;
 
     constructor() {
-
+        super()
     }
-
-    use(path: string, ...handlers: Handler[]): void;
+    
     use(...handlers: Handler[]): void;
-    use(arg1: string | Handler, ...args: Handler[]): void {
-        if (typeof arg1 === "string" ) {
+    use(path: string, ...handlers: Handler[]): void;
+    use(prefix: string, router: Router): void;
+    use(arg1: string | Handler, arg2: Handler | Router, ...args: Handler[]): void {
+        if (typeof arg1 === "string") {
+            if (arg2 instanceof Router) {
+                this._middleware.push(async (req, res, next) => {
+                    if (req.url?.startsWith(arg1)){
+                        req.url = req.url.slice(arg1.length) || "/";
+                        await this._handle(...arg2.layers)(req, res);
+                        return;
+                    }
+                    next?.();
+                });
+                return;
+            }
             this._middleware.push(async (req, res, next) => {
-                if (req.url?.startsWith(arg1)){
-                    await this._handle(...args)(req, res);
+                if (parseURLParams(req, arg1)) {
+                    await this._handle(arg2, ...args)(req, res);
                     return;
                 }
                 next?.();
             });
             return;
         }
-        this._middleware.push(...args);
-        
-    }
-
-    private _handle(...handlers: Handler[]) {
-        const handling = async (req: IncomingMessage, res:ServerResponse) => {
-            const run = async (index: number): Promise<void> => {
-            const layer = handlers[index];
-            if(!layer) return;
-            if(res.writableEnded) return;
-            try {
-                await layer(req, res, async () => run(index + 1));
-            } catch (error) {
-                console.log("Middleware Error: ", error);
-                if (!res.headersSent) {
-                    res.statusCode = 500;
-                    res.end("Internal server Error!!!");
-                }
-            }
-        } 
-        run(0);
-        }
-        return handling;
+        this._middleware.push(arg1, ...args);
         
     }
 
@@ -102,6 +96,7 @@ export class App {
 
     requestHandler() {
         const rh = async (req: IncomingMessage, res: ServerResponse) => {
+            console.log(App.routed++);
             await parseBody(req);
             parseURLQueryStrings(req);
             this._handle(...this._middleware)(req, res);

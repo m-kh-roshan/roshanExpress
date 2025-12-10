@@ -4,7 +4,6 @@ import type { ServerResponse } from "http";
 
 function roshanExpress() {
     const app = new App();
-
     const handler = app.requestHandler();
 
     const proxy = new Proxy(handler, {
