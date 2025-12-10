@@ -45,6 +45,11 @@ export async function parseBody (req: IncomingMessage, options: ParseBodyOptions
         });
     });
 
+    if (chunks.length === 0) {
+            req.body = {};
+            return;
+        }
+
     const buff = Buffer.concat(chunks);
     const contentType = req.headers["content-type"]?.split(";")[0] ?? "";
 
@@ -73,17 +78,19 @@ export async function parseBody (req: IncomingMessage, options: ParseBodyOptions
 export function parseURLParams(
     req: IncomingMessage, 
     routePattern: string
-): void {
+): boolean {
     const rawURL = req.url ?? "/";
     const pathOnly = rawURL.split("?")[0]?.split("#")[0];
 
-    const normalize = (u: string) => u.replace("/(^\/+|\/+$)/g", "");
+    const normalize = (u: string) => u.replace(/(^\/+|\/+$)/g, "");
 
     const pattern = normalize(routePattern);
     const path = normalize(pathOnly ?? "");
     
     const patternParts = pattern === "" ? [] : pattern.split("/");
     const pathParts = path === "" ? [] : path.split("/");
+
+    if (pathParts.length !== patternParts.length) return false;
 
     const result: Record<string, string | undefined> = {};
 
@@ -97,7 +104,10 @@ export function parseURLParams(
         }
 
         const isParam = p?.startsWith(":");
-        if (!isParam) continue;
+        if (!isParam) {
+            if (p !== pathParts[i]) return false;
+            continue;
+        }
 
         const paramNameRaw = p?.slice(1);
         const isOptional = paramNameRaw?.endsWith("?");
@@ -109,6 +119,7 @@ export function parseURLParams(
     }
 
     req.params = result;
+    return true;
 }
 
 export function parseURLQueryStrings(req: IncomingMessage) {

@@ -29,3 +29,18 @@ ServerResponse.prototype.send = function(body) {
 
     this.end(body)
 }
+
+ServerResponse.prototype.redirect = function(arg1: number| string, arg2?: string) {
+    if (typeof arg1 === "string") {
+        this.writeHead(302, {
+            location: arg1 
+        })
+        this.end();
+        return;
+    }
+    this.writeHead(arg1, {
+        location: arg2
+    })
+    this.end();
+    return;
+}

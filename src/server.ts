@@ -1,13 +1,76 @@
 import http from "http";
 import "./extensions/res.js";
-const server = http.createServer((req, res) => {
-    res.json({
-        name: "reza",
-        family: "roshan"
-    })
+import { App } from "./lib/roshanExpress.js";
+import roshanExpress from "./index.js";
+import type { IncomingMessage } from "http";
+import type { ServerResponse } from "http";
+
+
+
+const app = roshanExpress();
+
+app.use(async (req: IncomingMessage, res: ServerResponse, next) => {
+    req.user = {
+        id: 1,
+        username: "admin"
+    };
+
+    next?.();
 })
 
-server.listen(3001 , () => {
-    console.log("server is on http://localhost:3001");
-    
+app.get("/users/:name", async(req: IncomingMessage, res: ServerResponse, next) => {
+    console.log(req.params);
+    res.json(req.params);
+});
+
+app.get("/users/admin/:id", async(req: IncomingMessage, res: ServerResponse, next) => {
+    console.log(req.params);
+    console.log(req.query);
+    const result = {
+        params: req.params,
+        query: req.query
+    }
+    res.json(result);
+});
+
+app.get("/", async(req: IncomingMessage, res: ServerResponse) => {
+    console.log(req.query);
+    if (req.user) return res.json(req.user);
+    return res.json({message: "no user"});
+
+});
+
+app.post("/api/v1/users", (req, res, next) => {
+    if (!req.body || !["amin", "reza", "akbar"].includes(req.body.name)) {
+        res.statusCode = 400;
+        return res.json({
+            code: "NOT_ALLOWED",
+            message: "This name is not allowed"
+        })
+    }
+    req.name = req.body.name;
+    next?.();
+}, (req, res, next) => {
+    console.log({
+        name: req.name
+    });
+    return res.json({
+        code: "Allowed",
+        message: "This name is allowed",
+        data: req.body
+    });
+});
+
+app.use((req, res, next) => {
+    res.statusCode = 404
+    res.json({
+        code: "NOT_FOUND",
+        message: "Page not found",
+    })
+});
+
+
+const server = http.createServer(app);
+server.listen(3000, () => {
+    console.log(`server is running on http://localhost:3000 && ${server.address()}`)
 });
