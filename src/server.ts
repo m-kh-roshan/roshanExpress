@@ -1,18 +1,16 @@
 import http from "http";
 import "./extensions/res.js";
-import { App } from "./lib/roshanExpress.js";
 import roshanExpress from "./index.js";
 import type { IncomingMessage } from "http";
 import type { ServerResponse } from "http";
-import userRouter from "./example/users/index.js"
-import ServeStatic from "./lib/static.js";
+import userRouter from "./example/users/index.js";
 import { readFile } from "fs/promises";
 import { resolve } from "path";
 
 
 
 
-const app = roshanExpress();
+const app = roshanExpress({logger: true});
 
 app.use(async (req: IncomingMessage, res: ServerResponse, next) => {
     req.user = {
@@ -71,38 +69,8 @@ app.post("/api/v1/user", (req, res, next) => {
     });
 });
 
-app.post("/stat", async (req, res, next) => {
-    const {file} = req.body;
-    const base = resolve("src", "lib", file);
-    const sStatic = new ServeStatic(base.toString());
-    const content = await readFile(base);
-    res.send(content)
-});
+app.use("/static", roshanExpress.static("public"));
 
-app.get("/stat/:file", async (req, res, next) => {
-    const {file} = req.params;
-    const base = resolve("src", "lib", file);
-    const sStatic = new ServeStatic(base.toString());
-    const content = await readFile(base);
-    const mimeTypes: Record<string, string> = {
-    "html": "text/html",
-    "css": "text/css",
-    "js": "text/javascript",
-    "json": "application/json",
-    "txt": "text/plain",
-    "png": "image/png",
-    "jpg": "image/jpeg",
-    "jpeg": "image/jpeg",
-    "gif": "image/gif",
-    "webp": "image/webp",
-    "svg": "image/svg+xml",
-    "pdf": "application/pdf",
-    "zip": "application/zip",
-};
-    const extension = file.split(".").pop();
-    res.setHeader("content-type", mimeTypes[extension!] || "application/octet-stream");
-    res.end(content.toString());
-});
 
 app.use("/api/v1/users", userRouter);
 
@@ -111,8 +79,7 @@ app.get("/fars", (req, res, next) => {
 })
 
 app.use((req, res, next) => {
-    res.statusCode = 404
-    res.json({
+    res.status(404).json({
         code: "NOT_FOUND",
         message: "Page not found",
     })

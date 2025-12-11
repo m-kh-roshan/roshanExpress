@@ -1,67 +1,42 @@
 import type { IncomingMessage, ServerResponse } from "http";
-import type { Handler } from "./roshanExpress.js";
+
 import { Handle } from "./handler.js";
 import { parseURLParams } from "../extensions/req.js";
+import type { Handler, IRouter } from "../types/roshanexpress.js";
 
-export interface IRouter {
-    get: (url: string, ...handlers: Handler[]) => void;
-    post: (url: string, ...handlers: Handler[]) => void;
-    delete: (url: string, ...handlers: Handler[]) => void;
-    put: (url: string, ...handlers: Handler[]) => void;
-    patch: (url: string, ...handlers: Handler[]) => void;
-}
 
-export class Router extends Handle implements IRouter{
+
+export class Route extends Handle<Route> implements IRouter{
     private _layer: Handler[] = [];
 
     get layers() {
         return this._layer
     }
 
+    use(...handlers: Handler[]): void;
+    use(path: string, ...handlers: Handler[]): void;
+    use(prefix: string, router: Route): void;
+    use(arg1: string | Handler, arg2: Handler | Route, ...args: Handler[]): void {
+        this._use(this._layer, arg1, arg2, ...args);
+    }
+
     get(url: string, ...handlers: Handler[]) {
-        this._layer.push(async (req, res, next) => {
-            if (req.method === "GET" && parseURLParams(req, url)) {
-                await this._handle(...handlers)(req, res);
-                return;
-            }
-            next?.();
-        })
+        this.use(this._publicHandler(url, "GET", ...handlers));
     }
 
     post(url: string, ...handlers: Handler[]) {
-        this._layer.push(async (req, res, next) => {
-            if (req.method === "POST" && parseURLParams(req, url)) {
-                await this._handle(...handlers)(req, res);
-            }
-            next?.();
-        })
+        this.use(this._publicHandler(url, "POST", ...handlers))
     }
 
     delete(url: string, ...handlers: Handler[]) {
-        this._layer.push(async (req, res, next) => {
-            if (req.method === "DELETE" && parseURLParams(req, url)) {
-                parseURLParams(req, url);
-                await this._handle(...handlers)(req, res);
-            }
-            next?.();
-        })
+        this.use(this._publicHandler(url, "DELETE", ...handlers))
     }
 
     put(url: string, ...handlers: Handler[]) {
-        this._layer.push(async (req, res, next) => {
-            if (req.method === "put" && parseURLParams(req, url)) {
-                await this._handle(...handlers)(req, res);
-            }
-            next?.();
-        })
+        this.use(this._publicHandler(url, "PUT", ...handlers))
     }
 
     patch(url: string, ...handlers: Handler[]) {
-        this._layer.push(async (req, res, next) => {
-            if (req.method === "patch" && parseURLParams(req, url)) {
-                await this._handle(...handlers)(req, res);
-            }
-            next?.();
-        })
+        this.use(this._publicHandler(url, "PATCH", ...handlers))
     }
 }
