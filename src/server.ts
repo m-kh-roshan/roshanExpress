@@ -5,6 +5,10 @@ import roshanExpress from "./index.js";
 import type { IncomingMessage } from "http";
 import type { ServerResponse } from "http";
 import userRouter from "./example/users/index.js"
+import ServeStatic from "./lib/static.js";
+import { readFile } from "fs/promises";
+import { resolve } from "path";
+
 
 
 
@@ -65,6 +69,39 @@ app.post("/api/v1/user", (req, res, next) => {
         message: "This name is allowed",
         data: req.body
     });
+});
+
+app.post("/stat", async (req, res, next) => {
+    const {file} = req.body;
+    const base = resolve("src", "lib", file);
+    const sStatic = new ServeStatic(base.toString());
+    const content = await readFile(base);
+    res.send(content)
+});
+
+app.get("/stat/:file", async (req, res, next) => {
+    const {file} = req.params;
+    const base = resolve("src", "lib", file);
+    const sStatic = new ServeStatic(base.toString());
+    const content = await readFile(base);
+    const mimeTypes: Record<string, string> = {
+    "html": "text/html",
+    "css": "text/css",
+    "js": "text/javascript",
+    "json": "application/json",
+    "txt": "text/plain",
+    "png": "image/png",
+    "jpg": "image/jpeg",
+    "jpeg": "image/jpeg",
+    "gif": "image/gif",
+    "webp": "image/webp",
+    "svg": "image/svg+xml",
+    "pdf": "application/pdf",
+    "zip": "application/zip",
+};
+    const extension = file.split(".").pop();
+    res.setHeader("content-type", mimeTypes[extension!] || "application/octet-stream");
+    res.end(content.toString());
 });
 
 app.use("/api/v1/users", userRouter);

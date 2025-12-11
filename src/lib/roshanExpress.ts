@@ -17,7 +17,7 @@ export class App extends Handle implements IRouter {
     constructor() {
         super()
     }
-    
+
     use(...handlers: Handler[]): void;
     use(path: string, ...handlers: Handler[]): void;
     use(prefix: string, router: Router): void;
@@ -28,7 +28,7 @@ export class App extends Handle implements IRouter {
                     if (req.url?.startsWith(arg1)){
                         req.url = req.url.slice(arg1.length) || "/";
                         await this._handle(...arg2.layers)(req, res);
-                        return;
+                        if (res.writableEnded) return;
                     }
                     next?.();
                 });

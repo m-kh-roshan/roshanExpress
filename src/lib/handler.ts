@@ -15,10 +15,14 @@ export class Handle {
                 if (!res.headersSent) {
                     res.statusCode = 500;
                     res.end("Internal server Error!!!");
+                    return;
                 }
+                res.send("Internal Error. please report to developers");
+                return;
+
             }
         } 
-        run(0);
+        await run(0);
         }
         return handling;
     }

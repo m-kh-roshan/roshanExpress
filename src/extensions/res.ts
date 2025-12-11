@@ -15,17 +15,20 @@ ServerResponse.prototype.send = function(body) {
         this.statusCode = 204;
         return this.end();
 
-    } else if (typeof body === "object") {
+    }
+    if (typeof body === "object") {
         if (Buffer.isBuffer(body)) {
             this.setHeader("content-type", "application/octet-stream");
-        } else return this.json(body);
-
-    }else if (typeof body === "string") {
-        this.setHeader("content-type", "application/html");
-
-    } else {
-        body = body.toString()
+            return this.end(body);
+        } 
+        return this.json(body);
     }
+    if (typeof body === "string") {
+        this.setHeader("content-type", "text/html");
+        return this.end(body);
+    } 
+    
+    body = body.toString()
 
     this.end(body)
 }
@@ -43,4 +46,9 @@ ServerResponse.prototype.redirect = function(arg1: number| string, arg2?: string
     })
     this.end();
     return;
+}
+
+ServerResponse.prototype.status = function(statusCode) {
+    this.statusCode = statusCode;
+    return this;
 }

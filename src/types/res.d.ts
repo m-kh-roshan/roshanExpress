@@ -5,5 +5,6 @@ declare module "http" {
         send(body?: any): void;
         redirect(status: number, url: string): void;
         redirect(url: string): void;
+        status(statusCode: number);
     }
 }
