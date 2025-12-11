@@ -1,7 +1,11 @@
 import type { IncomingMessage, ServerResponse } from "http";
 import { parseURLParams } from "../extensions/req.js";
-import type { Handler } from "./roshanExpress.js";
 
+export type Handler = (
+    req: IncomingMessage,
+    res: ServerResponse,
+    next?: () => void
+) => Promise<void> | void;
 
 export abstract class Handle<T extends {layers: Handler[]}> {
     protected _use(targetLayer: Handler[],arg1: string | Handler, arg2: Handler | T, ...args: Handler[]): void {

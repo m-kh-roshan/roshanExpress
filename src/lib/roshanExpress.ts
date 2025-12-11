@@ -1,14 +1,11 @@
-import type { IncomingMessage } from "http";
+import { IncomingMessage } from "http";
 import type { ServerResponse } from "http";
 import { App } from "./app.js";
 import { ServeStatic } from "./static.js";
 import { Route } from "./router.js";
+import type { Handler } from "./handler.js";
 
-export type Handler = (
-    req: IncomingMessage,
-    res: ServerResponse,
-    next?: () => void
-) => Promise<void> | void;
+
 
 export type LoggerOption = {
     method?: string,
@@ -21,6 +18,10 @@ export type RoshanExpressOptions = {
 }
 
 export type Logger = boolean | LoggerOption;
+
+export type RoshanExpressRequest = IncomingMessage;
+export type RoshanExpressRespons = ServerResponse;
+export type RoshanExpressHandler = Handler;
 
 export interface IRouter {
     get: (url: string, ...handlers: Handler[]) => void;

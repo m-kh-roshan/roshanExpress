@@ -1,6 +1,6 @@
 import path from "path";
 import { readFile, stat } from "fs/promises";
-import type { Handler } from "./roshanExpress.js";
+import type { Handler } from "./handler.js";
 export class ServeStatic {
     private _folder: string
     constructor(folder: string){
