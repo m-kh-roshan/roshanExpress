@@ -1,8 +1,8 @@
 import http, { IncomingMessage, type ServerResponse } from "http";
-import { parseBody, parseURLParams, parseURLQueryStrings } from "../extensions/req.js";
-import { Handle, type Handler } from "./handler.js";
-import { Route} from "./router.js";
-import type { IRouter, Logger, RoshanExpressOptions } from "./roshanExpress.js";
+import { parseBody, parseURLParams, parseURLQueryStrings } from "../extensions/req";
+import { Handle, type Handler } from "./handler";
+import { Route} from "./router";
+import type { IRouter, Logger, RoshanExpressOptions } from "./roshanExpress";
 
 
 

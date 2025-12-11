@@ -3,6 +3,10 @@
   "version": "1.0.2",
   "description": "A framework like express but more freindly",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/m-kh-roshan/roshanExpress"
+  },
   "author": "Reza Roshan",
   "type": "module",
   "main": "./dist/index.js",

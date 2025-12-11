@@ -1,9 +1,9 @@
 import { IncomingMessage } from "http";
 import type { ServerResponse } from "http";
-import { App } from "./app.js";
-import { ServeStatic } from "./static.js";
-import { Route } from "./router.js";
-import type { Handler } from "./handler.js";
+import { App } from "./app";
+import { ServeStatic } from "./static";
+import { Route } from "./router";
+import type { Handler } from "./handler";
 
 
 

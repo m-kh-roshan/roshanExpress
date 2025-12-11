@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from "http";
-import { parseURLParams } from "../extensions/req.js";
+import { parseURLParams } from "../extensions/req";
 
 export type Handler = (
     req: IncomingMessage,

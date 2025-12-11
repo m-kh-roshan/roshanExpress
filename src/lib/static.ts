@@ -1,6 +1,6 @@
 import path from "path";
 import { readFile, stat } from "fs/promises";
-import type { Handler } from "./handler.js";
+import type { Handler } from "./handler";
 export class ServeStatic {
     private _folder: string
     constructor(folder: string){
