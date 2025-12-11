@@ -68,9 +68,10 @@ export class App extends Handle<Route> implements IRouter {
         return rh;
     }
 
-    listen(port: number) {
+    listen(port: number, listener?: () => void) {
         const server = http.createServer(this.requestHandler());
         server.listen(port);
+        listener?.();
     }
 
 }

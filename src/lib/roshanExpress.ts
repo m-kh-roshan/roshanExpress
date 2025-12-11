@@ -32,10 +32,9 @@ function serStatic(folder: string) {
 }
 roshanExpress.static = serStatic;
 
-function newRouter() {
+export function Router() {
     return new Route();
 }
-roshanExpress.Router = newRouter;
 
 export default roshanExpress;
 
