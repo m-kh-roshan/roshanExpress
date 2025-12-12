@@ -1,13 +1,22 @@
 {
   "name": "roshanexpress",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "A framework like express but more freindly",
   "license": "ISC",
   "author": "Reza Roshan",
   "type": "module",
-  "main": "index.js",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": ["dist/**/*"],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",

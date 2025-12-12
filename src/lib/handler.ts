@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "http";
-import type { Handler } from "../types/roshanexpress.js";
 import { parseURLParams } from "../extensions/req.js";
+import type { Handler } from "./roshanExpress.js";
 
 
 export abstract class Handle<T extends {layers: Handler[]}> {

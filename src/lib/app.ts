@@ -4,7 +4,7 @@ import { Handle } from "./handler.js";
 import { Route} from "./router.js";
 import path from "path";
 import { readFile, stat } from "fs/promises";
-import type { Handler, IRouter, Logger, RoshanExpressOptions } from "../types/roshanexpress.js";
+import type { Handler, IRouter, Logger, RoshanExpressOptions } from "./roshanExpress.js";
 
 
 

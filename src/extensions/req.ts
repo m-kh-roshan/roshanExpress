@@ -1,11 +1,21 @@
-import { error } from "console";
 import {IncomingMessage} from "http";
-import { zipToObject } from "../lib/logic.js";
+import "http";
 
 type ParseBodyOptions = {
     limit?: number;
     timeout?: number;
  }
+
+ 
+declare module "http" {
+    export interface IncomingMessage {
+        body?: any;
+        params?: any;
+        query?: any;
+        path: string;
+    }
+}
+
 export async function parseBody (req: IncomingMessage, options: ParseBodyOptions = {}) {
     const {limit = 1024 * 1024, timeout = 10_000} = options;
 

@@ -1,10 +1,34 @@
 import type { IncomingMessage } from "http";
 import type { ServerResponse } from "http";
-import type { RoshanExpressOptions } from "../types/roshanexpress.js";
 import { App } from "./app.js";
 import { ServeStatic } from "./static.js";
 import { Route } from "./router.js";
 
+export type Handler = (
+    req: IncomingMessage,
+    res: ServerResponse,
+    next?: () => void
+) => Promise<void> | void;
+
+export type LoggerOption = {
+    method?: string,
+    url?: string,
+    statusCode?: string
+};
+
+export type RoshanExpressOptions = {
+    logger?: Logger
+}
+
+export type Logger = boolean | LoggerOption;
+
+export interface IRouter {
+    get: (url: string, ...handlers: Handler[]) => void;
+    post: (url: string, ...handlers: Handler[]) => void;
+    delete: (url: string, ...handlers: Handler[]) => void;
+    put: (url: string, ...handlers: Handler[]) => void;
+    patch: (url: string, ...handlers: Handler[]) => void;
+}
 
 function roshanExpress(options?: RoshanExpressOptions) {
     const app = new App(options);
