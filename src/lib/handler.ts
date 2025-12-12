@@ -1,9 +1,9 @@
-import type { IncomingMessage, ServerResponse } from "http";
-import { parseURLParams } from "../extensions/req";
+import { parseURLParams, type RoshanExpressRequest } from "../extensions/req";
+import type { RoshanExpressRespons } from "../extensions/res";
 
 export type Handler = (
-    req: IncomingMessage,
-    res: ServerResponse,
+    req: RoshanExpressRequest,
+    res: RoshanExpressRespons,
     next?: () => void
 ) => Promise<void> | void;
 
@@ -54,7 +54,7 @@ export abstract class Handle<T extends {layers: Handler[]}> {
     }
 
     protected _handle(...handlers: Handler[]) {
-        const handling = async (req: IncomingMessage, res:ServerResponse) => {
+        const handling = async (req: RoshanExpressRequest, res:RoshanExpressRespons) => {
             const run = async (index: number): Promise<void> => {
             const layer = handlers[index];
             if(!layer) return;

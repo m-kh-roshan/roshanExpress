@@ -10,6 +10,9 @@ declare module "http" {
     }
 }
 
+export type RoshanExpressRespons = ServerResponse;
+
+
 ServerResponse.prototype.json = function(body) {
      if (body === null || body === undefined) {
         this.statusCode = 204;

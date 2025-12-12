@@ -1,8 +1,9 @@
-import http, { IncomingMessage, type ServerResponse } from "http";
-import { parseBody, parseURLParams, parseURLQueryStrings } from "../extensions/req";
+import http from "http";
+import { parseBody, parseURLParams, parseURLQueryStrings, type RoshanExpressRequest } from "../extensions/req";
 import { Handle, type Handler } from "./handler";
 import { Route} from "./router";
 import type { IRouter, Logger, RoshanExpressOptions } from "./roshanExpress";
+import type { RoshanExpressRespons } from "../extensions/res";
 
 
 
@@ -20,7 +21,7 @@ export class App extends Handle<Route> implements IRouter {
         if (options?.logger) this.logger = options.logger;
     }
 
-    private _setLogger(req: IncomingMessage, res: ServerResponse): void {
+    private _setLogger(req: RoshanExpressRequest, res: RoshanExpressRespons): void {
         if (!this.logger) return;
         if (typeof this.logger === "boolean") {
             console.log(req?.method, req?.url, res.statusCode);
@@ -57,7 +58,7 @@ export class App extends Handle<Route> implements IRouter {
     }
 
     requestHandler() {
-        const rh = async (req: IncomingMessage, res: ServerResponse) => {
+        const rh = async (req: RoshanExpressRequest, res: RoshanExpressRespons) => {
             await parseBody(req);
             parseURLQueryStrings(req);
             this._handle(...this._middleware)(req, res);

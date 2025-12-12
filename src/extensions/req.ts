@@ -7,16 +7,14 @@ type ParseBodyOptions = {
  }
 
  
-declare module "http" {
-    export interface IncomingMessage {
-        body?: any;
-        params?: any;
-        query?: any;
-        path: string;
-    }
-}
+export interface RoshanExpressRequest extends IncomingMessage {
+    body?: any;
+    params?: any;
+    query?: any;
+    path: string;
+};
 
-export async function parseBody (req: IncomingMessage, options: ParseBodyOptions = {}) {
+export async function parseBody (req: RoshanExpressRequest, options: ParseBodyOptions = {}) {
     const {limit = 1024 * 1024, timeout = 10_000} = options;
 
     if (req.method === "GET" || req.method === "HEAD") {
@@ -132,7 +130,7 @@ export function parseURLParams(
     return true;
 }
 
-export function parseURLQueryStrings(req: IncomingMessage) {
+export function parseURLQueryStrings(req: RoshanExpressRequest) {
     const url = req.url ?? "";
     const host = req.headers.host ?? "localhost"
     try {

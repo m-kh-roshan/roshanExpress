@@ -1,9 +1,9 @@
-import { IncomingMessage } from "http";
-import type { ServerResponse } from "http";
 import { App } from "./app";
 import { ServeStatic } from "./static";
 import { Route } from "./router";
 import type { Handler } from "./handler";
+import type { RoshanExpressRequest } from "../extensions/req";
+import type { RoshanExpressRespons } from "../extensions/res";
 
 
 
@@ -19,8 +19,8 @@ export type RoshanExpressOptions = {
 
 export type Logger = boolean | LoggerOption;
 
-export type RoshanExpressRequest = IncomingMessage;
-export type RoshanExpressRespons = ServerResponse;
+
+
 export type RoshanExpressHandler = Handler;
 
 export interface IRouter {
@@ -48,7 +48,7 @@ function roshanExpress(options?: RoshanExpressOptions) {
         }
     });
 
-    return proxy as App & ((req: IncomingMessage, res: ServerResponse) => Promise<void>);
+    return proxy as App & ((req: RoshanExpressRequest, res: RoshanExpressRespons) => Promise<void>);
 }
 
 function serStatic(folder: string) {
