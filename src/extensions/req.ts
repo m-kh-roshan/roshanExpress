@@ -1,5 +1,6 @@
 import {IncomingMessage} from "http";
 import "http";
+import { BadJsonError } from "../lib/errors/req.error";
 
 type ParseBodyOptions = {
     limit?: number;
@@ -65,7 +66,7 @@ export async function parseBody (req: RoshanExpressRequest, options: ParseBodyOp
         try {
             req.body = JSON.parse(buff.toString("utf8"));
         } catch (error) {
-            throw new Error("Invalid JSON");
+            throw new BadJsonError();
         }
         return;
     }

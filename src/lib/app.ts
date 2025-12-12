@@ -4,6 +4,7 @@ import { Handle, type Handler } from "./handler";
 import { Route} from "./router";
 import type { IRouter, Logger, RoshanExpressOptions } from "./roshanExpress";
 import type { RoshanExpressRespons } from "../extensions/res";
+import { HttpError } from "./errors/httpError";
 
 
 
@@ -57,12 +58,30 @@ export class App extends Handle<Route> implements IRouter {
         this.use(this._publicHandler(url, "PATCH", ...handlers))
     }
 
+    private _handleError (err: any, req: RoshanExpressRequest, res: RoshanExpressRespons) {
+        if (err instanceof HttpError) {
+            return res.status(err.statusCode).json({
+                code: err.code,
+                message: err.message
+            });
+        }
+        console.error(err);
+        res.status(500).json({
+            code: "INTERNAL_ERROR",
+            message: "Something went wrong"
+        })
+    }
+
     requestHandler() {
         const rh = async (req: RoshanExpressRequest, res: RoshanExpressRespons) => {
-            await parseBody(req);
-            parseURLQueryStrings(req);
-            this._handle(...this._middleware)(req, res);
-            this._setLogger(req, res);
+            try {
+                await parseBody(req);
+                parseURLQueryStrings(req);
+                await this._handle(...this._middleware)(req, res);
+                this._setLogger(req, res);
+            } catch (error) {
+                this._handleError(error, req, res);
+            }
         }
 
         return rh;

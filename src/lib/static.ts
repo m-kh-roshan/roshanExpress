@@ -1,6 +1,7 @@
 import path from "path";
 import { readFile, stat } from "fs/promises";
 import type { Handler } from "./handler";
+import { StaticError } from "./errors/static.error";
 export class ServeStatic {
     private _folder: string
     constructor(folder: string){
@@ -31,10 +32,9 @@ export class ServeStatic {
         const root = path.resolve(this._folder);
 
         return async (req, res, next) => {
+            const requestPath = req.path || req.url;
+            const filePath = path.join(root, requestPath!);
             try {
-                const requestPath = req.path || req.url;
-                const filePath = path.join(root, requestPath!);
-                
                 if (!filePath.startsWith(root)){
                     return next?.();
                     
@@ -57,7 +57,7 @@ export class ServeStatic {
 
                 next?.();
             } catch (error) {
-                console.error(error);
+                throw new StaticError(filePath);
                 next?.();
             }
         }
