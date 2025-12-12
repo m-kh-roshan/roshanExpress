@@ -7,3 +7,4 @@ export default roshanexpress;
 export * from "./lib/roshanExpress";
 export * from "./extensions/req";
 export * from "./extensions/res";
+export * from "./lib/router";
