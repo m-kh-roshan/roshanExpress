@@ -14,8 +14,8 @@ export abstract class Handle<T extends {layers: Handler[]}> {
             if (arg2 && this._isRouter(arg2)) {
                 const router = arg2;
                 targetLayer.push(async (req, res, next) => {
-                    req.pathStack?.push(arg1);
                     if (this._isSuburlStartWith(req.pathStack ?? [], req.url ?? "/")){
+                        req.pathStack?.push(arg1);
                         await this._handle(...arg2.layers)(req, res);
                         if (res.writableEnded) return; //If req.url not matched by Router patterns
                     }
@@ -24,13 +24,13 @@ export abstract class Handle<T extends {layers: Handler[]}> {
                 return;
             }
             targetLayer.push(async (req, res, next) => {
-                req.pathStack?.push(arg1);
                 if (parseURLParams(req)) {
+                    req.pathStack?.push(arg1);
                     await this._handle(arg2, ...args)(req, res);
                     if (res.writableEnded) return;
                 }
-                req.pathStack?.push(arg1);
                 if (this._isSuburlStartWith(req.pathStack ?? [], req.url ?? "/")) {
+                    req.pathStack?.push(arg1);
                     req.path = req.url?.slice(arg1.length) || "/";
                     await this._handle(arg2, ...args)(req, res);
                     if (res.writableEnded) return;
@@ -48,8 +48,8 @@ export abstract class Handle<T extends {layers: Handler[]}> {
 
     protected _publicHandler(url: string , method: string, ...handlers: Handler[]): Handler {
         return async (req, res, next) => {
-            req.pathStack?.push(url)
             if (req.method === method && parseURLParams(req)) {
+                req.pathStack?.push(url)
                 await this._handle(...handlers)(req, res);
                 return;
             }
