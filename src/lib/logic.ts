@@ -4,7 +4,7 @@ export function urlAndPatternNormalize(urlPattern: string[] = [], url?: string) 
 
     const normalize = (u: string) => u.replace(/(^\/+|\/+$)/g, "");
 
-    const pattern = "/" + urlPattern.map(normalize).filter(Boolean).join("/");
+    const pattern = urlPattern.map(normalize).filter(Boolean).join("/") ;
     const path = normalize(pathOnly ?? "");
     
     const patternParts = pattern === "" ? [] : pattern.split("/");
