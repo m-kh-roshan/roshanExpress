@@ -1,12 +1,16 @@
-export function zipToObject<K extends string, V>(
-    keys: readonly K[],
-    values: readonly V[]
-): Record<K, V | undefined> {
-    const obj = {} as Record<K, V | undefined>;
+export function urlAndPatternNormalize(urlPattern: string[] = [], url?: string) {
+    const rawURL = url ?? "/";
+    const pathOnly = rawURL.split("?")[0]?.split("#")[0];
 
-    keys.forEach((v, i) => {
+    const normalize = (u: string) => u.replace(/(^\/+|\/+$)/g, "");
 
-        obj[v] = values[i];
-    })
-    return obj
+    const pattern = "/" + urlPattern.map(normalize).filter(Boolean).join("/");
+    const path = normalize(pathOnly ?? "");
+    
+    const patternParts = pattern === "" ? [] : pattern.split("/");
+    const pathParts = path === "" ? [] : path.split("/");
+
+    return {
+        patternParts, pathParts
+    };
 }

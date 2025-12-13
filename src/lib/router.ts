@@ -2,9 +2,8 @@ import { Handle, type Handler } from "./handler";
 import type { IRouter } from "./roshanExpress";
 
 
-
-
 export class Route extends Handle<Route> implements IRouter{
+    readonly isRoute = true;
     private _layer: Handler[] = [];
 
     get layers() {

@@ -75,6 +75,8 @@ export class App extends Handle<Route> implements IRouter {
     requestHandler() {
         const rh = async (req: RoshanExpressRequest, res: RoshanExpressRespons) => {
             try {
+                req.subUrl = req.url || "/";
+                req.pathStack = [];
                 await parseBody(req);
                 parseURLQueryStrings(req);
                 await this._handle(...this._middleware)(req, res);

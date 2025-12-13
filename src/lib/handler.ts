@@ -1,5 +1,6 @@
 import { parseURLParams, type RoshanExpressRequest } from "../extensions/req";
 import type { RoshanExpressRespons } from "../extensions/res";
+import { urlAndPatternNormalize } from "./logic";
 
 export type Handler = (
     req: RoshanExpressRequest,
@@ -13,8 +14,9 @@ export abstract class Handle<T extends {layers: Handler[]}> {
             if (arg2 && this._isRouter(arg2)) {
                 const router = arg2;
                 targetLayer.push(async (req, res, next) => {
-                    if (req.url?.startsWith(arg1)){
-                        req.url = req.url.slice(arg1.length) || "/";
+                    req.pathStack?.push(arg1);
+                    req.subUrl = req.url?.slice(arg1.length) || "/";
+                    if (this._isSuburlStartWith(req.pathStack ?? [], req.subUrl)){
                         await this._handle(...arg2.layers)(req, res);
                         if (res.writableEnded) return; //If req.url not matched by Router patterns
                     }
@@ -23,12 +25,15 @@ export abstract class Handle<T extends {layers: Handler[]}> {
                 return;
             }
             targetLayer.push(async (req, res, next) => {
-                if (parseURLParams(req, arg1)) {
+                req.pathStack?.push(arg1);
+                if (parseURLParams(req)) {
                     await this._handle(arg2, ...args)(req, res);
                     if (res.writableEnded) return;
                 }
-                if (req.url?.startsWith(arg1)) {
-                    req.path = req.url.substring(arg1.length) || "/";
+                req.pathStack?.push(arg1);
+                req.subUrl = req.url?.slice(arg1.length) || "/";
+                if (this._isSuburlStartWith(req.pathStack ?? [], req.subUrl)) {
+                    req.path = req.subUrl;
                     await this._handle(arg2, ...args)(req, res);
                     if (res.writableEnded) return;
                 }
@@ -40,12 +45,13 @@ export abstract class Handle<T extends {layers: Handler[]}> {
         
     }
     private _isRouter(obj: any): obj is T {
-        return obj && Array.isArray(obj.layers)
+        return !!obj && obj.isRoute === true;
     }
 
     protected _publicHandler(url: string , method: string, ...handlers: Handler[]): Handler {
         return async (req, res, next) => {
-            if (req.method === method && parseURLParams(req, url)) {
+            req.pathStack?.push(url)
+            if (req.method === method && parseURLParams(req)) {
                 await this._handle(...handlers)(req, res);
                 return;
             }
@@ -76,5 +82,17 @@ export abstract class Handle<T extends {layers: Handler[]}> {
         await run(0);
         }
         return handling;
+    }
+
+    private _isSuburlStartWith(urlPattern: string[], url: string): boolean{
+        const {pathParts, patternParts} = urlAndPatternNormalize(urlPattern, url);
+        if (pathParts.length < patternParts.length) return false;
+
+        for (let i = 0; i < patternParts.length; i++) {
+            if (patternParts[i]?.startsWith(":")) continue;
+
+            if (patternParts[i] !== pathParts[i]) return false;
+        }
+        return true;
     }
 }

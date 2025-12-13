@@ -1,6 +1,7 @@
 import {IncomingMessage} from "http";
 import "http";
 import { BadJsonError } from "../lib/errors/req.error";
+import { urlAndPatternNormalize } from "../lib/logic";
 
 type ParseBodyOptions = {
     limit?: number;
@@ -11,6 +12,8 @@ type ParseBodyOptions = {
 export interface RoshanExpressRequest extends IncomingMessage {
     body?: any;
     params?: any;
+    pathStack?: string[];
+    subUrl?: string;
     query?: any;
     path: string;
 };
@@ -84,21 +87,12 @@ export async function parseBody (req: RoshanExpressRequest, options: ParseBodyOp
     req.body = buff;
 }
 
+
+
 export function parseURLParams(
-    req: IncomingMessage, 
-    routePattern: string
+    req: RoshanExpressRequest
 ): boolean {
-    const rawURL = req.url ?? "/";
-    const pathOnly = rawURL.split("?")[0]?.split("#")[0];
-
-    const normalize = (u: string) => u.replace(/(^\/+|\/+$)/g, "");
-
-    const pattern = normalize(routePattern);
-    const path = normalize(pathOnly ?? "");
-    
-    const patternParts = pattern === "" ? [] : pattern.split("/");
-    const pathParts = path === "" ? [] : path.split("/");
-
+    const {pathParts, patternParts} = urlAndPatternNormalize(req.pathStack, req.url);
     if (pathParts.length !== patternParts.length) return false;
 
     const result: Record<string, string | undefined> = {};
