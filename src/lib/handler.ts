@@ -15,8 +15,7 @@ export abstract class Handle<T extends {layers: Handler[]}> {
                 const router = arg2;
                 targetLayer.push(async (req, res, next) => {
                     req.pathStack?.push(arg1);
-                    req.subUrl = req.url?.slice(arg1.length) || "/";
-                    if (this._isSuburlStartWith(req.pathStack ?? [], req.subUrl)){
+                    if (this._isSuburlStartWith(req.pathStack ?? [], req.url ?? "/")){
                         await this._handle(...arg2.layers)(req, res);
                         if (res.writableEnded) return; //If req.url not matched by Router patterns
                     }
@@ -31,9 +30,8 @@ export abstract class Handle<T extends {layers: Handler[]}> {
                     if (res.writableEnded) return;
                 }
                 req.pathStack?.push(arg1);
-                req.subUrl = req.url?.slice(arg1.length) || "/";
-                if (this._isSuburlStartWith(req.pathStack ?? [], req.subUrl)) {
-                    req.path = req.subUrl;
+                if (this._isSuburlStartWith(req.pathStack ?? [], req.url ?? "/")) {
+                    req.path = req.url?.slice(arg1.length) || "/";
                     await this._handle(arg2, ...args)(req, res);
                     if (res.writableEnded) return;
                 }
