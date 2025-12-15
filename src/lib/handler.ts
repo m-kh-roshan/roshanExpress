@@ -78,8 +78,6 @@ export abstract class Handle<T extends {layers: Handler[]}> {
                 return;
 
             }
-
-            if (res.writableEnded) return;
         } 
         await run(0);
         }

@@ -84,10 +84,6 @@ export class App extends Handle<Route> implements IRouter {
             } catch (error) {
                 this._handleError(error, req, res);
             }
-
-            if (!res.writableEnded) {
-                res.send(`${req.method} ${req.method} not found`);
-            }
         }
 
         return rh;
