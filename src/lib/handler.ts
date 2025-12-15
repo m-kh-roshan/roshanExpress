@@ -64,9 +64,12 @@ export abstract class Handle<T extends {layers: Handler[]}> {
             const run = async (index: number): Promise<void> => {
             const layer = handlers[index];
             if(!layer) return;
-            if(res.writableEnded) return;
             try {
-                await layer(req, res, async () => run(index + 1));
+                await layer(req, res, async () => {
+                    if (!res.writableEnded) {
+                        await run(index + 1);
+                    }
+                });
             } catch (error) {
                 console.log("Handler&Middileware Error: ", error);
                 if (!res.headersSent) {
@@ -76,8 +79,9 @@ export abstract class Handle<T extends {layers: Handler[]}> {
                 }
                 res.send("Internal Error. please report to developers");
                 return;
-
             }
+
+            if (res.writableEnded) return;
         } 
         await run(0);
         }
