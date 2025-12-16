@@ -80,7 +80,12 @@ export class App extends Handle<Route> implements IRouter {
                 await parseBody(req);
                 parseURLQueryStrings(req);
                 await this._handle(...this._middleware)(req, res);
-                this._setLogger(req, res);
+                if (res.writableEnded){
+                    this._setLogger(req, res);
+                    return;
+                }
+
+                res.send(`${req.method} ${req.url} not found`);
             } catch (error) {
                 this._handleError(error, req, res);
             }
