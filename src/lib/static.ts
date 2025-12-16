@@ -58,7 +58,6 @@ export class ServeStatic {
                 next?.();
             } catch (error) {
                 throw new StaticError(filePath);
-                next?.();
             }
         }
     }

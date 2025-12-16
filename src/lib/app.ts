@@ -58,6 +58,18 @@ export class App extends Handle<Route> implements IRouter {
         this.use(this._publicHandler(url, "PATCH", ...handlers))
     }
 
+    all(url: string, ...handlers: Handler[]) {
+        this.use(async (req, res, next) => {
+            req.pathStack?.push(url);
+            if (parseURLParams(req)) {
+                await this._handle(...handlers)(req, res);
+                return;
+            }
+            req.pathStack?.pop();
+            next?.();
+        })
+    }
+
     private _handleError (err: any, req: RoshanExpressRequest, res: RoshanExpressRespons) {
         if (err instanceof HttpError) {
             return res.status(err.statusCode).json({
