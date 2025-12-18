@@ -1,5 +1,5 @@
-import { Handle, type Handler } from "./handler";
-import type { IRouter } from "./roshanExpress";
+import { Handle, type Handler } from "./handler.js";
+import type { IRouter } from "./roshanExpress.js";
 
 
 export class Route extends Handle<Route> implements IRouter{

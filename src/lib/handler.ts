@@ -1,6 +1,6 @@
-import { parseURLParams, type RoshanExpressRequest } from "../extensions/req";
-import type { RoshanExpressRespons } from "../extensions/res";
-import { urlAndPatternNormalize } from "./logic";
+import { parseURLParams, type RoshanExpressRequest } from "../extensions/req.js";
+import type { RoshanExpressRespons } from "../extensions/res.js";
+import { urlAndPatternNormalize } from "./logic.js";
 
 export type Handler = (
     req: RoshanExpressRequest,

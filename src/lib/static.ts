@@ -1,7 +1,7 @@
 import path from "path";
 import { readFile, stat } from "fs/promises";
-import type { Handler } from "./handler";
-import { StaticError } from "./errors/static.error";
+import type { Handler } from "./handler.js";
+import { StaticError } from "./errors/static.error.js";
 export class ServeStatic {
     private _folder: string
     constructor(folder: string){

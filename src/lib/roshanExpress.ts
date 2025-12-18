@@ -1,9 +1,9 @@
-import { App } from "./app";
-import { ServeStatic } from "./static";
-import { Route } from "./router";
-import type { Handler } from "./handler";
-import type { RoshanExpressRequest } from "../extensions/req";
-import type { RoshanExpressRespons } from "../extensions/res";
+import { App } from "./app.js";
+import { ServeStatic } from "./static.js";
+import { Route } from "./router.js";
+import type { Handler } from "./handler.js";
+import type { RoshanExpressRequest } from "../extensions/req.js";
+import type { RoshanExpressRespons } from "../extensions/res.js";
 
 
 

@@ -1,10 +1,10 @@
 import http from "http";
-import { parseBody, parseURLParams, parseURLQueryStrings, type RoshanExpressRequest } from "../extensions/req";
-import { Handle, type Handler } from "./handler";
-import { Route} from "./router";
-import type { IRouter, Logger, RoshanExpressOptions } from "./roshanExpress";
-import type { RoshanExpressRespons } from "../extensions/res";
-import { HttpError } from "./errors/httpError";
+import { parseBody, parseURLParams, parseURLQueryStrings, type RoshanExpressRequest } from "../extensions/req.js";
+import { Handle, type Handler } from "./handler.js";
+import { Route} from "./router.js";
+import type { IRouter, Logger, RoshanExpressOptions } from "./roshanExpress.js";
+import type { RoshanExpressRespons } from "../extensions/res.js";
+import { HttpError } from "./errors/httpError.js";
 
 
 

@@ -1,7 +1,7 @@
 import {IncomingMessage} from "http";
 import "http";
-import { BadJsonError } from "../lib/errors/req.error";
-import { urlAndPatternNormalize } from "../lib/logic";
+import { BadJsonError } from "../lib/errors/req.error.js";
+import { urlAndPatternNormalize } from "../lib/logic.js";
 
 type ParseBodyOptions = {
     limit?: number;
