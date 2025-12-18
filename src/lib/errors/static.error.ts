@@ -1,4 +1,4 @@
-import { HttpError } from "./httpError";
+import { HttpError } from "./httpError.js";
 
 export class StaticError extends HttpError {
     constructor (path: string) {
