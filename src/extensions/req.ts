@@ -2,6 +2,7 @@ import {IncomingMessage} from "http";
 import "http";
 import { BadJsonError } from "../lib/errors/req.error.js";
 import { urlAndPatternNormalize } from "../lib/logic.js";
+import Busboy from "busboy";
 
 type ParseBodyOptions = {
     limit?: number;
@@ -18,6 +19,45 @@ export interface RoshanExpressRequest extends IncomingMessage {
     path: string;
 };
 
+function parseMultipart (req: RoshanExpressRequest) {
+    return new Promise<void>((resolve, reject) => {
+        const contentType = req.headers["content-type"];
+        if (!contentType?.startsWith("multipart/form-data")) {
+            return resolve();
+        }
+
+        const busboy = Busboy({headers: req.headers});
+
+        const fields: Record<string, string> = {};
+        const files: any[] = [];
+
+        busboy.on("field", (name, value) => {
+            fields[name] = value;
+        });
+
+        busboy.on("file", (name, stream , info) => {
+            const {filename, mimeType} = info;
+            
+            files.push({
+                fieldname: name,
+                filename,
+                mimeType,
+                stream
+            });
+        });
+
+        busboy.on("finish", () => {
+            req.body = { fields, files };
+            resolve();
+        });
+
+        busboy.on("error", reject);
+
+        req.pipe(busboy);
+    })
+}
+
+
 export async function parseBody (req: RoshanExpressRequest, options: ParseBodyOptions = {}) {
     const {limit = 1024 * 1024, timeout = 10_000} = options;
 
@@ -27,6 +67,13 @@ export async function parseBody (req: RoshanExpressRequest, options: ParseBodyOp
     }
 
     let size = 0;
+
+    const contentTypeMulti = req.headers["content-type"] ?? "";
+
+    if (contentTypeMulti.startsWith("multipart/form-data")) {
+        await parseMultipart(req);
+        return;
+    }
 
     const chunks: Buffer[] = [];
     await new Promise<void> ((resolve, reject) => {
