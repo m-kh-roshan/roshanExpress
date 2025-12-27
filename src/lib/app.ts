@@ -89,7 +89,7 @@ export class App extends Handle<Route> implements IRouter {
             try {
                 req.subUrl = req.url || "/";
                 req.pathStack = [];
-                await parseBody(req);
+                await parseBody(req, res);
                 parseURLQueryStrings(req);
                 await this._handle(...this._middleware)(req, res);
                 this._setLogger(req, res);

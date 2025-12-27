@@ -8,3 +8,4 @@ export * from "./lib/roshanExpress.js";
 export * from "./extensions/req.js";
 export * from "./extensions/res.js";
 export * from "./lib/router.js";
+export type {UploadedFile} from "./lib/file.js"

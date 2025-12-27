@@ -1,8 +1,13 @@
 import {IncomingMessage} from "http";
 import "http";
+import fs from "fs";
 import { BadJsonError } from "../lib/errors/req.error.js";
 import { urlAndPatternNormalize } from "../lib/logic.js";
 import Busboy from "busboy";
+import { InternalUploadedFile } from "../lib/file.js";
+import path from "path";
+import os from "os";
+import type { RoshanExpressRespons } from "./res.js";
 
 type ParseBodyOptions = {
     limit?: number;
@@ -19,7 +24,8 @@ export interface RoshanExpressRequest extends IncomingMessage {
     path: string;
 };
 
-function parseMultipart (req: RoshanExpressRequest) {
+function parseMultipart (req: RoshanExpressRequest, res: RoshanExpressRespons) {
+    const MEMORY_LIMIT = 5 * 1024 * 1024;
     return new Promise<void>((resolve, reject) => {
         const contentType = req.headers["content-type"];
         if (!contentType?.startsWith("multipart/form-data")) {
@@ -29,33 +35,67 @@ function parseMultipart (req: RoshanExpressRequest) {
         const busboy = Busboy({headers: req.headers});
 
         const fields: Record<string, string> = {};
-        const files: any[] = [];
+        const files: InternalUploadedFile[] = [];
 
         busboy.on("field", (name, value) => {
             fields[name] = value;
         });
 
         busboy.on("file", (name, stream , info) => {
-            console.log("stream readable");
             const {filename, mimeType} = info;
             
-            stream.on("data", chunck => {
-                console.log("chuncks", chunck.length);
+            const file = new InternalUploadedFile(
+                name,
+                info.filename,
+                info.mimeType
+            );
+
+            let buffers: Buffer[] = [];
+            let tempStream: fs.WriteStream | null = null;
+
+            stream.on("data", chunk => {
+                file.size += chunk.length;
+
+                if (!tempStream && file.size > MEMORY_LIMIT) {
+                    const tempPath = path.join(
+                        os.tmpdir(), `roshan-${Date.now()}-${Math.random()}`
+                    );
+
+                    file.tempPath = tempPath;
+                    tempStream = fs.createWriteStream(tempPath);
+
+                    for (const b of buffers) tempStream.write(b);
+
+                    buffers = [];
+                }
+
+                if (tempStream) {
+                    tempStream.write(chunk);
+                } else {
+                    buffers.push(chunk);
+                }
             });
+
             stream.on("end", () => {
-                console.log("stream end");
-                
-            })
-            files.push({
-                fieldname: name,
-                filename,
-                mimeType,
-                stream
+                if (tempStream) {
+                    tempStream.end();
+                } else {
+                    file.buffer = Buffer.concat(buffers);
+                }
             });
+
+            files.push(file);
         });
 
         busboy.on("finish", () => {
             req.body = { fields, files };
+
+            res.once("finish", () => {
+                for (const f of files) {
+                    if (!f.consumed) f.cleanup();
+                }
+            });
+
             resolve();
         });
 
@@ -66,7 +106,7 @@ function parseMultipart (req: RoshanExpressRequest) {
 }
 
 
-export async function parseBody (req: RoshanExpressRequest, options: ParseBodyOptions = {}) {
+export async function parseBody (req: RoshanExpressRequest, res: RoshanExpressRespons, options: ParseBodyOptions = {}) {
     const {limit = 1024 * 1024, timeout = 10_000} = options;
 
     if (req.method === "GET" || req.method === "HEAD") {
@@ -79,7 +119,7 @@ export async function parseBody (req: RoshanExpressRequest, options: ParseBodyOp
     const contentTypeMulti = req.headers["content-type"] ?? "";
 
     if (contentTypeMulti.startsWith("multipart/form-data")) {
-        await parseMultipart(req);
+        await parseMultipart(req, res);
         return;
     }
 
