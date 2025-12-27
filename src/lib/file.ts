@@ -1,6 +1,6 @@
 import { finished, Readable } from "stream";
 import fs from "fs";
-import { NoDataFileError } from "./errors/file.error";
+import { NoDataFileError } from "./errors/file.error.js";
 
 export interface UploadedFile {
     fieldname: string;
