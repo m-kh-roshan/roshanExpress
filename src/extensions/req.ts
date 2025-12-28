@@ -3,7 +3,6 @@ import "http";
 import { BadJsonError } from "../lib/errors/req.error.js";
 import { urlAndPatternNormalize } from "../lib/logic.js";
 import Busboy from "busboy";
-import { PassThrough } from "stream";
 
 type ParseBodyOptions = {
     limit?: number;
@@ -37,16 +36,21 @@ function parseMultipart (req: RoshanExpressRequest) {
         });
 
         busboy.on("file", (name, stream , info) => {
+            console.log("stream readable");
             const {filename, mimeType} = info;
-
-            const pass = new PassThrough();
             
-            stream.pipe(pass);
+            stream.on("data", chunck => {
+                console.log("chuncks", chunck.length);
+            });
+            stream.on("end", () => {
+                console.log("stream end");
+                
+            })
             files.push({
                 fieldname: name,
                 filename,
                 mimeType,
-                stream: pass
+                stream
             });
         });
 
