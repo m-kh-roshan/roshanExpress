@@ -1,4 +1,5 @@
-import { finished, Readable } from "stream";
+import { Readable } from "stream";
+import { finished } from "stream/promises";
 import fs from "fs";
 import { NoDataFileError } from "./errors/file.error";
 
@@ -47,8 +48,14 @@ export class InternalUploadedFile implements UploadedFile {
 
     async consume<T>(fn: (stream: NodeJS.ReadableStream) => Promise<T>) {
         this.consumed = true;
+
+        const stream = this.createReadStream();
         try {
-            return await fn(this.createReadStream());
+            const result = await fn(stream);
+
+            await finished(stream);
+
+            return result;
         } finally {
             await this.cleanup();
         }
